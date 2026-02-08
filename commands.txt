@@ -1,0 +1,32 @@
+# Available Commands
+
+## General
+- **/ping**: Check if the bot is responsive.
+- **/rank [user]**: View your or another user's server stats (Tenure, Rep, Messages, Voice).
+- **/rep [user] [reason]**: Give a reputation point to a helpful user.
+
+## Moderation
+- **/kick [user] [reason]**: Kick a user from the server.
+- **/ban [user] [reason]**: Ban a user from the server.
+- **/warn [user] [reason]**: Issue a formal warning to a user.
+- **/timeout [user] [duration] [reason]**: Mute a user for a specific duration in minutes.
+- **/undo [case_id]**: Undo a previous moderation action (e.g., unban, unmute).
+- **/purge [amount]**: Bulk delete messages (1-100) from the current channel.
+
+## Administration
+- **/setup**: Launch the interactive setup panel to configure the bot.
+- **/autorole add [type] [threshold] [role]**: Create a new auto-role rule (Types: Tenure, Messages, Voice, Rep).
+- **/autorole list**: List all active auto-role rules.
+- **/autorole remove [id]**: Remove an auto-role rule by its ID.
+
+## Ticket System
+- **/ticket panel**: Post the interactive ticket creation panel in the current channel.
+- **/ticket config**: Configure the support role and category for tickets.
+- **/ticket close**: Forcefully close the current ticket (if inside a ticket channel).
+
+## Channel Management Dashboard
+- **/channel info [channel]**: Visualize all permissions, allowing and denying roles/users.
+- **/channel clone [channel] [name]**: Clone a channel instantly.
+- **/channel sync [channel]**: Force a channel to sync permissions with its category.
+- **/channel template [channel] [type]**: Apply a preset: `public`, `private`, or `read_only`.
+- **/channel audit**: Scan the entire server for high-risk permissions (Admin, Manage Server).

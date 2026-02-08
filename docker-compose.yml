@@ -1,0 +1,10 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    restart: always
+    volumes:
+      - ./logs:/usr/src/app/logs
+      - ./dist:/usr/src/app/dist
+      # For dev, you might mount source
+      # - ./src:/usr/src/app/src

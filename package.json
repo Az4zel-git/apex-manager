@@ -1,0 +1,43 @@
+{
+  "name": "apex-manager",
+  "version": "1.0.0",
+  "description": "A secure, permission-aware Discord admin bot. Apex Manager.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest",
+    "deploy:commands": "ts-node src/scripts/deploy-commands.ts"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "admin",
+    "moderation"
+  ],
+  "author": "Azazel (Discord: @azaze.1)",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "@types/inquirer": "^9.0.9",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "inquirer": "^8.2.7",
+    "winston": "^3.11.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "prisma": "^5.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,13 @@
+roles:
+  admin:
+    - "Administrator"
+    - "Server Owner"
+  moderator:
+    - "Moderator"
+    - "Helper"
+  
+permissions:
+  kick: ["moderator", "admin"]
+  ban: ["admin"]
+  warn: ["moderator", "admin"]
+  manage_voice: ["admin"]

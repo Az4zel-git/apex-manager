@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Case {
+  id           Int      @id @default(autoincrement())
+  guildId      String
+  targetId     String
+  moderatorId  String
+  action       String   // WARN, MUTE, KICK, BAN, UNBAN
+  reason       String?
+  createdAt    DateTime @default(now())
+  duration     Int?     // For mutes (seconds)
+  active       Boolean  @default(true)
+
+  @@index([guildId, createdAt])
+}
+
+model TempVoiceChannel {
+  id        String   @id @default(uuid())
+  channelId String   @unique
+  ownerId   String
+  guildId   String
+  createdAt DateTime @default(now())
+}
+
+model GuildConfig {
+  guildId      String @id
+  modRoles     String // JSON string or comma separated
+  adminRoles   String // JSON string or comma separated
+  logChannelId       String?
+  generatorChannelId String?
+
+  // features           GuildFeature[]
+}
+
+model GuildFeature {
+  guildId   String
+  featureKey String // 'server_stats', 'verification', etc.
+  enabled   Boolean @default(false)
+  config    String  // JSON string
+  updatedAt DateTime @updatedAt
+
+  // guild     GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@id([guildId, featureKey])
+}
+
+model MemberStats {
+  guildId            String
+  userId             String
+  messagesTotal      Int      @default(0)
+  voiceMinutesTotal  Int      @default(0)
+  reputation         Int      @default(0)
+  
+  messagesWeekly     Int      @default(0)
+  voiceMinutesWeekly Int      @default(0)
+  
+  lastDailyMessage   DateTime?
+  joinedAt           DateTime @default(now()) // For tenure tracking
+
+  @@id([guildId, userId])
+  @@index([guildId])
+}
+
+model AutoRoleRule {
+  id        Int    @id @default(autoincrement())
+  guildId   String
+  type      String // TENURE, MESSAGES, VOICE, REPUTATION
+  threshold Int
+  roleId    String
+}
+
+model AchievementConfig {
+  id      Int    @id @default(autoincrement())
+  guildId String
+  type    String // WEEKLY_MESSAGES, WEEKLY_VOICE
+  roleId  String
+  count   Int    @default(1) // Number of top users to award (e.g. Top 3)
+}
+
+// --- TICKET SYSTEM ---
+model Ticket {
+  id              Int      @id @default(autoincrement())
+  guildId         String
+  channelId       String?  // Nullable if archived/deleted
+  ownerId         String
+  categoryId      String   // 'order', 'issue', etc.
+  status          String   // OPEN, CLAIMED, CLOSED
+  subject         String
+  description     String
+  claimedBy       String?
+  createdAt       DateTime @default(now())
+  closedAt        DateTime?
+  transcriptUrl   String?
+  
+  messages        TicketMessage[]
+  events          TicketEvent[]
+
+  @@index([guildId, status])
+}
+
+model TicketMessage {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model TicketEvent { // Audit Log
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actorId   String
+  action    String   // CREATED, CLAIMED, CLOSED
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model TicketConfig { // Per-guild settings
+  guildId           String @id
+  supportRoleId     String
+  logChannelId      String?
+  categoryId        String? // Discord Category ID for open tickets
+  archiveCategoryId String?
+}
+
+model TicketPanel {
+  id           String              @id @default(uuid())
+  guildId      String
+  name         String              // user-friendly name (e.g. "Main Support")
+  channelId    String?
+  messageId    String?
+
+  title        String              @default("Support Tickets")
+  description  String              @default("Need help? Click a button below to open a ticket.")
+  color        String              @default("#00FF00")
+  thumbnailUrl String?
+  imageUrl     String?
+
+  buttons      TicketPanelButton[]
+
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@unique([guildId, name])
+}
+
+model TicketPanelButton {
+  id        String      @id @default(uuid())
+  panelId   String
+  panel     TicketPanel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  label     String
+  emoji     String?
+  style     String      // PRIMARY, SECONDARY, SUCCESS, DANGER
+  customId  String      // "ticket_create_order"
+  
+  order     Int         @default(0)
+}
+
+// --- MOD CONTROL CENTER ---
+model ModeratorProfile {
+  userId         String
+  guildId        String
+  status         String   @default("ACTIVE") // ACTIVE, BUSY, IDLE, OFFLINE
+  isJunior       Boolean  @default(false)
+  optedOut       Boolean  @default(false)
+  
+  burnoutScore   Int      @default(0)
+  lastBreakStart DateTime?
+
+  metrics        ModeratorMetrics[]
+  assignments    TicketAssignment[]
+  
+  @@id([guildId, userId])
+}
+
+model ModeratorMetrics {
+  id             Int      @id @default(autoincrement())
+  modId          String
+  guildId        String
+  date           DateTime @default(now()) // Daily bucket
+  
+  ticketsResolved Int     @default(0)
+  avgResponseTime Int     @default(0) // seconds
+  reopenCount    Int      @default(0)
+  
+  moderator      ModeratorProfile @relation(fields: [guildId, modId], references: [guildId, userId], onDelete: Cascade)
+  
+  @@unique([modId, guildId, date])
+  @@index([guildId, date])
+}
+
+model TicketAssignment {
+  id             Int      @id @default(autoincrement())
+  ticketId       Int
+  modId          String
+  guildId        String
+  assignedAt     DateTime @default(now())
+  unassignedAt   DateTime?
+  reason         String?  // AUTO, MANUAL, REASSIGN
+  
+  moderator      ModeratorProfile @relation(fields: [guildId, modId], references: [guildId, userId], onDelete: Cascade)
+}
+
+model ModAuditLog {
+  id             Int      @id @default(autoincrement())
+  guildId        String
+  actorId        String
+  action         String
+  targetId       String?
+  details        String?  // JSON
+  createdAt      DateTime @default(now())
+  
+  @@index([guildId, createdAt])
+}
+
+model BurnoutEvent {
+  id             Int      @id @default(autoincrement())
+  modId          String
+  guildId        String
+  severity       String   // HIGH, MEDIUM
+  reason         String
+  createdAt      DateTime @default(now())
+  acknowledged   Boolean  @default(false)
+}
+
+model ModSettings {
+  guildId        String   @id
+  fairnessWeights String? // JSON
+  burnoutThresholds String? // JSON
+}
