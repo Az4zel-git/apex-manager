@@ -61,7 +61,7 @@ Whether you're running a small gaming server or a large community, Apex Manager 
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/llAzazell/apex-manager.git
+    git clone https://github.com/Azazelx0/apex-manager.git
     cd apex-manager
     ```
 
@@ -123,7 +123,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 If you need help or have any questions, feel free to reach out:
 
 - **Discord**: @azaze.1
-- **GitHub Issues**: [Open an issue](https://github.com/llAzazell/apex-manager/issues)
+- **GitHub Issues**: [Open an issue](https://github.com/Azazelx0/apex-manager/issues)
 
 ---
 
